@@ -11,3 +11,27 @@
     import 'relative/path/to/stylesheet.scss';
 
 */
+
+.erase-task {
+    font-size: 1.5rem;
+    vertical-align: auto;
+    height: min-content;
+    color: red;
+
+}
+
+.erase-task:hover {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+}
+
+.task-counter {
+    color:white;
+    font-size: large;
+}
+
+.alert-danger{
+    background-color: #ff0017;
+    color: white;
+}
