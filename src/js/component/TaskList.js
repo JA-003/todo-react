@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
 
 let baseURL = "https://assets.breatheco.de/apis/fake/todos/user/";
-// let username = "JA0035";
+// let username = "";
 
+// ### Main component
 export function TaskList() {
+	// ### Hooks
 	const [task, setTask] = useState("");
 	const [taskListArray, setTaskListArray] = useState([]);
 	const [error, setError] = useState(false);
 	const [username, setUsername] = useState("");
 
-	const fetchAPIPost = async () => {
+	// ### Fetch API request functions
+
+	// POST to API
+	const fetchAPIPost = async user => {
 		try {
-			let response = await fetch(baseURL + username, {
+			let response = await fetch(baseURL + user, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
@@ -32,9 +37,10 @@ export function TaskList() {
 		}
 	};
 
-	const fetchAPIGet = async () => {
+	// GET from API
+	const fetchAPIGet = async user => {
 		try {
-			let response = await fetch(baseURL + username, {
+			let response = await fetch(baseURL + user, {
 				method: "GET",
 				headers: {
 					"Content-Type": "application/json"
@@ -48,15 +54,17 @@ export function TaskList() {
 			} else {
 				console.log(response.status);
 				console.log(body);
+				fetchAPIPost(user);
 			}
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-	const fetchAPIPut = async updatedArrayOfTask => {
+	// PUT on API
+	const fetchAPIPut = async (updatedArrayOfTask, user) => {
 		try {
-			let response = await fetch(baseURL + username, {
+			let response = await fetch(baseURL + user, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json"
@@ -65,7 +73,7 @@ export function TaskList() {
 			});
 			if (response.ok) {
 				console.log("success PUTTING");
-				await fetchAPIGet();
+				await fetchAPIGet(user);
 			} else {
 				console.log("failed PUT");
 			}
@@ -74,6 +82,7 @@ export function TaskList() {
 		}
 	};
 
+	// DELETE ALL from API
 	const fetchAPIDelete = async () => {
 		try {
 			let response = await fetch(baseURL + username, {
@@ -84,6 +93,7 @@ export function TaskList() {
 			});
 			let body = await response.json();
 			if (response.ok) {
+				setUsername("");
 				console.log("succesfully deleted tasklist");
 			} else {
 				console.log("something is wrong");
@@ -100,6 +110,7 @@ export function TaskList() {
 		// fetchAPIDelete();
 	}, []);
 
+	// ADD NEW USER
 	const addUser = event => {
 		if (event.target.value === "") {
 			console.log("userempty");
@@ -107,32 +118,37 @@ export function TaskList() {
 		}
 		if (event.key == "Enter") {
 			setUsername(event.target.value);
-			console.log(username);
+			fetchAPIGet(event.target.value);
 		}
 	};
 
+	// ADD NEW TASK
 	const addTask = event => {
 		if (task === "") {
 			setError(true);
 			return;
 		}
 		if (event.key == "Enter") {
-			// let milliseconds = Date().toString();
 			let newArray = [...taskListArray, { label: task, done: false }];
-			fetchAPIPut(newArray);
+			console.log(newArray);
+			fetchAPIPut(newArray, username);
+			console.log(newArray);
 			setTask("");
 			setError(false);
 		}
 	};
 
+	// DELETE A SINGLE TASK
 	const deleteTask = id => {
 		const newTaskListArray = taskListArray.filter((task, index) => {
 			return index != id;
 		});
 		console.log(Date.now());
-		setTaskListArray(newTaskListArray);
+		// setTaskListArray(newTaskListArray);
+		fetchAPIPut(newTaskListArray, username);
 	};
 
+	// CLEAR INPUT WHERE TASK ARE WRITTEN
 	const clear = () => {
 		setTask("");
 		setError(false);
@@ -160,8 +176,17 @@ export function TaskList() {
 						className="btn btn-dark"
 						onClick={() => {
 							setUsername("");
+							setTaskListArray([]);
 						}}>
 						Change
+					</span>
+					<span
+						className="btn btn-danger"
+						onClick={() => {
+							setUsername("");
+							fetchAPIDelete();
+						}}>
+						Delete
 					</span>
 				</div>
 			)}
